@@ -16,6 +16,11 @@ pub struct Puzzle {
 
 impl Puzzle {
     pub fn show(&self) {
-        println!("{:#?}", self.field)
+        for i in self.field.iter() {
+            for j in i.iter() {
+                print!("{} ", j.p_type)
+            }
+            println!()
+        }
     }
 }
