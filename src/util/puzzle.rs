@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Drop {
     pub drop_type: std::cell::Cell<i32>,
     // pub is_delete: std::cell::Cell<bool>,
@@ -114,7 +114,8 @@ impl Puzzle {
                 break;
             }
             combo += combo_hash.len() as i32;
-            self.next_field();
+            break;
+            // self.next_field();
         }
         combo
     }
