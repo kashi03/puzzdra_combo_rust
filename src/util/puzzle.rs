@@ -16,15 +16,15 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    pub fn show(&self) {
-        for i in self.field.iter() {
-            for j in i.iter() {
-                // print!("{} ", j.combo_hash.borrow().to_string())
-                print!("{:02} ", j.drop_type.get())
-            }
-            println!()
-        }
-    }
+    // pub fn show(&self) {
+    //     for i in self.field.iter() {
+    //         for j in i.iter() {
+    //             // print!("{} ", j.combo_hash.borrow().to_string())
+    //             print!("{:02} ", j.drop_type.get())
+    //         }
+    //         println!()
+    //     }
+    // }
 
     fn down_drop(&self, x:usize, y:usize) {
         if self.field[y+1][x].combo_hash.borrow().to_string() != "" {
@@ -114,8 +114,7 @@ impl Puzzle {
                 break;
             }
             combo += combo_hash.len() as i32;
-            break;
-            // self.next_field();
+            self.next_field();
         }
         combo
     }

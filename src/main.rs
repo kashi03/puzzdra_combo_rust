@@ -4,7 +4,7 @@ use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
-#[derive(Default, Clone)]
+#[derive(Debug, Default, Clone)]
 struct Point {
     x: i32,
     y: i32
@@ -72,12 +72,22 @@ fn get_next_state(state: State, dst: Point) -> State {
 fn beam_search(first_state: State, move_number: usize) -> State {
     let field_width = 6;
     let field_height = 5;
-    let k = 1000; // ビーム幅
+    let k = 3000; // ビーム幅
     let mut now_states:BinaryHeap<State> = BinaryHeap::new();
-    now_states.push(first_state);
+    for x in 0..6 {
+        for y in 0..5 {
+            now_states.push(State {
+                field: first_state.field.clone(),
+                combo: 0,
+                point: Point { x: x, y: y },
+                move_history: vec![Point { x: x, y: y }]
+            })
+        }
+    }
+    // now_states.push(first_state);
     
-    for _ in 0..move_number {
-        println!("{}", now_states.len());
+    for count in 0..move_number {
+        println!("{}", count);
         let mut next_states:BinaryHeap<State> = BinaryHeap::new();
         for _ in 0..k {
             if now_states.is_empty() { break; }
@@ -106,11 +116,11 @@ fn beam_search(first_state: State, move_number: usize) -> State {
 
 fn main() {
     let f: [[i32;6];5] = [
-        [0,0,0,3,4,5],
-        [1,2,3,4,5,0],
-        [2,3,3,5,0,1],
-        [2,2,2,0,1,2],
-        [2,5,3,1,2,3],
+        [1,2,3,3,4,5],
+        [4,0,4,5,0,4],
+        [1,4,0,1,1,5],
+        [4,4,0,2,2,1],
+        [4,3,1,4,2,0],
     ];
     let mut field: [[pz::Drop; 6]; 5] = Default::default();
     for (i, row) in f.iter().enumerate() {
@@ -124,14 +134,17 @@ fn main() {
         }
     }
 
-    let first_point: Point = Default::default();
+    let first_point: Point = Point {
+        x: 0,
+        y: 0
+    };
     let first_state: State = State {
         field: field,
         combo: 0,
         point: first_point.clone(),
         move_history: vec![first_point.clone()]
     };
-    let combo = beam_search(first_state, 20);
+    let combo = beam_search(first_state, 70);
     // let a = pz::Puzzle {
     //     field: field,
     //     field_width: 6,
@@ -139,5 +152,6 @@ fn main() {
     // };
     // let combo = a.get_combo();
     // a.show();
-    println!("{}", combo.combo)
+    println!("{:?}", combo.move_history);
+    println!("{}", combo.combo);
 }
