@@ -1,5 +1,8 @@
 use std::collections::HashSet;
 
+pub const FIELD_WIDTH: usize = 6;
+pub const FIELD_HEIGHT: usize = 5;
+
 #[derive(Debug, Default, Clone)]
 pub struct Drop {
     pub drop_type:i32,
@@ -24,7 +27,7 @@ impl Drop {
 
 #[derive(Debug)]
 pub struct Puzzle {
-    pub field: [[Drop; 6]; 5],
+    pub field: [[Drop; FIELD_WIDTH]; FIELD_HEIGHT],
     pub field_width: i32,
     pub field_height: i32,
 }

@@ -1,5 +1,6 @@
 mod util;
 use util::puzzle as pz;
+use util::puzzle::{ FIELD_WIDTH, FIELD_HEIGHT };
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
@@ -11,7 +12,7 @@ struct Point {
 
 #[derive(Default, Clone)]
 struct State {
-    field: [[pz::Drop; 6]; 5],
+    field: [[pz::Drop; FIELD_WIDTH]; FIELD_HEIGHT],
     combo: i32,
     point: Point,
     move_history: Vec<Point>
@@ -38,9 +39,9 @@ impl Ord for State {
 }
 
 fn get_next_state(state:&mut State, dst: Point) -> State {
-    let mut next_field: [[pz::Drop; 6]; 5] = Default::default();
-    for y in 0..5 {
-        for x in 0..6 {
+    let mut next_field: [[pz::Drop; FIELD_WIDTH]; FIELD_HEIGHT] = Default::default();
+    for y in 0..FIELD_HEIGHT {
+        for x in 0..FIELD_WIDTH {
             next_field[y][x].drop_type_mut(state.field[y][x].drop_type.clone());
         }
     }
@@ -53,8 +54,8 @@ fn get_next_state(state:&mut State, dst: Point) -> State {
     next_field[dst.y as usize][dst.x as usize].drop_type_mut(tmp1);
     let mut puzzle = pz::Puzzle {
         field: state.field.clone(),
-        field_width: 6,
-        field_height: 5,
+        field_width: FIELD_WIDTH as i32,
+        field_height: FIELD_HEIGHT as i32,
     };
     let combo = puzzle.get_combo();
     let mut next_move_histry: Vec<Point> = Vec::new();
@@ -69,8 +70,6 @@ fn get_next_state(state:&mut State, dst: Point) -> State {
 }
 
 fn beam_search(first_state: State, move_number: usize) -> State {
-    let field_width = 6;
-    let field_height = 5;
     let k = 3000; // ビーム幅
     let mut now_states:BinaryHeap<State> = BinaryHeap::new();
     for x in 0..6 {
@@ -95,7 +94,7 @@ fn beam_search(first_state: State, move_number: usize) -> State {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x-1, y: state.point.y });
                 next_states.push(next_state);
             }
-            if state.point.x+1 < field_width {
+            if state.point.x+1 < FIELD_WIDTH as i32 {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x+1, y: state.point.y });
                 next_states.push(next_state);
             }
@@ -103,7 +102,7 @@ fn beam_search(first_state: State, move_number: usize) -> State {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x, y: state.point.y-1 });
                 next_states.push(next_state);
             }
-            if state.point.y+1 < field_height {
+            if state.point.y+1 < FIELD_HEIGHT as i32 {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x, y: state.point.y+1 });
                 next_states.push(next_state);
             }
@@ -114,14 +113,14 @@ fn beam_search(first_state: State, move_number: usize) -> State {
 }
 
 fn main() {
-    let f: [[i32;6];5] = [
+    let f: [[i32; FIELD_WIDTH]; FIELD_HEIGHT] = [
         [1,2,3,3,4,5],
         [4,0,4,5,0,4],
         [1,4,0,1,1,5],
         [4,4,0,2,2,1],
         [4,3,1,4,2,0],
     ];
-    let mut field: [[pz::Drop; 6]; 5] = Default::default();
+    let mut field: [[pz::Drop; FIELD_WIDTH]; FIELD_HEIGHT] = Default::default();
     for (i, row) in f.iter().enumerate() {
         for (j, col) in row.iter().enumerate() {
             field[i][j] = pz::Drop {
