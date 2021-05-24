@@ -3,7 +3,7 @@ use std::collections::HashSet;
 pub const FIELD_WIDTH: usize = 6;
 pub const FIELD_HEIGHT: usize = 5;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Hash)]
 pub struct Drop {
     pub drop_type:i32,
     // pub is_delete: std::cell::Cell<bool>,
@@ -25,7 +25,7 @@ impl Drop {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub struct Puzzle {
     pub field: [[Drop; FIELD_WIDTH]; FIELD_HEIGHT],
     pub field_width: i32,
@@ -111,9 +111,9 @@ impl Puzzle {
     pub fn get_combo(&mut self) -> i32 {
         let mut combo: i32 = 0;
         loop {
-            for (y, row) in self.field.clone().iter().enumerate() {
-                for (x, col) in row.iter().enumerate() {
-                    self.check_drop(x, y, col.drop_type.clone(), format!("{}{}", x, y));
+            for y in 0..FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    self.check_drop(x, y, self.field[y][x].drop_type, format!("{}{}", x, y));
                 }
             }
     
