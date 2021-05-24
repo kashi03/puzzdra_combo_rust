@@ -1,6 +1,5 @@
 mod util;
 use util::puzzle as pz;
-use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
@@ -38,22 +37,22 @@ impl Ord for State {
     }
 }
 
-fn get_next_state(state: State, dst: Point) -> State {
-    let next_field: [[pz::Drop; 6]; 5] = Default::default();
-    for (y, row) in next_field.iter().enumerate() {
-        for (x, col) in row.iter().enumerate() {
-            col.drop_type.set(state.field[y][x].drop_type.get());
+fn get_next_state(state:&mut State, dst: Point) -> State {
+    let mut next_field: [[pz::Drop; 6]; 5] = Default::default();
+    for y in 0..5 {
+        for x in 0..6 {
+            next_field[y][x].drop_type_mut(state.field[y][x].drop_type.clone());
         }
     }
 
-    let tmp1 = next_field[state.point.y as usize][state.point.x as usize].drop_type.get();
-    let tmp2 = next_field[dst.y as usize][dst.x as usize].drop_type.get();
-    state.field[state.point.y as usize][state.point.x as usize].drop_type.set(tmp2);
-    state.field[dst.y as usize][dst.x as usize].drop_type.set(tmp1);
-    next_field[state.point.y as usize][state.point.x as usize].drop_type.set(tmp2);
-    next_field[dst.y as usize][dst.x as usize].drop_type.set(tmp1);
-    let puzzle = pz::Puzzle {
-        field: state.field,
+    let tmp1 = next_field[state.point.y as usize][state.point.x as usize].drop_type;
+    let tmp2 = next_field[dst.y as usize][dst.x as usize].drop_type;
+    state.field[state.point.y as usize][state.point.x as usize].drop_type_mut(tmp2);
+    state.field[dst.y as usize][dst.x as usize].drop_type_mut(tmp1);
+    next_field[state.point.y as usize][state.point.x as usize].drop_type_mut(tmp2);
+    next_field[dst.y as usize][dst.x as usize].drop_type_mut(tmp1);
+    let mut puzzle = pz::Puzzle {
+        field: state.field.clone(),
         field_width: 6,
         field_height: 5,
     };
@@ -93,19 +92,19 @@ fn beam_search(first_state: State, move_number: usize) -> State {
             if now_states.is_empty() { break; }
             let state: State = now_states.pop().unwrap();
             if state.point.x-1 >= 0 {
-                let next_state = get_next_state(state.clone(), Point { x: state.point.x-1, y: state.point.y });
+                let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x-1, y: state.point.y });
                 next_states.push(next_state);
             }
             if state.point.x+1 < field_width {
-                let next_state = get_next_state(state.clone(), Point { x: state.point.x+1, y: state.point.y });
+                let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x+1, y: state.point.y });
                 next_states.push(next_state);
             }
             if state.point.y-1 >= 0 {
-                let next_state = get_next_state(state.clone(), Point { x: state.point.x, y: state.point.y-1 });
+                let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x, y: state.point.y-1 });
                 next_states.push(next_state);
             }
             if state.point.y+1 < field_height {
-                let next_state = get_next_state(state.clone(), Point { x: state.point.x, y: state.point.y+1 });
+                let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x, y: state.point.y+1 });
                 next_states.push(next_state);
             }
         }
@@ -126,10 +125,10 @@ fn main() {
     for (i, row) in f.iter().enumerate() {
         for (j, col) in row.iter().enumerate() {
             field[i][j] = pz::Drop {
-                drop_type: Cell::new(*col),
+                drop_type: *col,
                 // is_delete: Cell::new(false),
-                is_search: Cell::new(false),
-                combo_hash: RefCell::new("".to_string()),
+                is_search: false,
+                combo_hash: "".to_string(),
             }
         }
     }
