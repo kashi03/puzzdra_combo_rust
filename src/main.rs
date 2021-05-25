@@ -2,10 +2,13 @@ mod util;
 use util::puzzle as pz;
 use util::puzzle::{ FIELD_WIDTH, FIELD_HEIGHT };
 use std::cmp::Ordering;
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashSet};
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
 use rand::{ thread_rng, Rng };
 
-#[derive(Debug, Default, Clone)]
+
+#[derive(Debug, Default, Clone, Hash)]
 struct Point {
     x: i32,
     y: i32
@@ -17,6 +20,14 @@ struct State {
     combo: i32,
     point: Point,
     move_history: Vec<Point>
+}
+
+impl Hash for State {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.field.hash(state);
+        self.combo.hash(state);
+        self.point.hash(state);
+    }
 }
 
 impl PartialEq for State {
@@ -70,6 +81,12 @@ fn get_next_state(state:&mut State, dst: Point) -> State {
     }
 }
 
+fn get_hash(item: &State) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    item.hash(&mut hasher);
+    hasher.finish()
+}
+
 fn beam_search(first_state: State, move_number: usize) -> State {
     let k = 3000; // ビーム幅
     let mut now_states:BinaryHeap<State> = BinaryHeap::new();
@@ -83,29 +100,47 @@ fn beam_search(first_state: State, move_number: usize) -> State {
             })
         }
     }
+
+    let mut done: HashSet<u64> = HashSet::new();
     // now_states.push(first_state);
     
     for _count in 0..move_number {
-        println!("{}", _count);
+        println!("{}: {}", _count, now_states.len());
         let mut next_states:BinaryHeap<State> = BinaryHeap::new();
         for _ in 0..k {
             if now_states.is_empty() { break; }
             let state: State = now_states.pop().unwrap();
             if state.point.x-1 >= 0 {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x-1, y: state.point.y });
-                next_states.push(next_state);
+                let hash = get_hash(&next_state);
+                if !done.contains(&hash) {
+                    next_states.push(next_state);
+                    done.insert(hash);
+                }
             }
             if state.point.x+1 < FIELD_WIDTH as i32 {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x+1, y: state.point.y });
-                next_states.push(next_state);
+                let hash = get_hash(&next_state);
+                if !done.contains(&hash) {
+                    next_states.push(next_state);
+                    done.insert(hash);
+                }
             }
             if state.point.y-1 >= 0 {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x, y: state.point.y-1 });
-                next_states.push(next_state);
+                let hash = get_hash(&next_state);
+                if !done.contains(&hash) {
+                    next_states.push(next_state);
+                    done.insert(hash);
+                }
             }
             if state.point.y+1 < FIELD_HEIGHT as i32 {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x, y: state.point.y+1 });
-                next_states.push(next_state);
+                let hash = get_hash(&next_state);
+                if !done.contains(&hash) {
+                    next_states.push(next_state);
+                    done.insert(hash);
+                }
             }
         }
         now_states = next_states;
@@ -114,6 +149,13 @@ fn beam_search(first_state: State, move_number: usize) -> State {
 }
 
 fn main() {
+    // let f: [[i32; FIELD_WIDTH]; FIELD_HEIGHT] = [
+    //     [4, 4, 3, 5, 0, 1],
+    //     [1, 2, 0, 5, 2, 1],
+    //     [1, 5, 5, 3, 4, 0],
+    //     [5, 2, 3, 1, 0, 3],
+    //     [0, 3, 2, 5, 4, 2],
+    // ];
     let mut f: [[i32; FIELD_WIDTH]; FIELD_HEIGHT] = Default::default();
     let mut rng = thread_rng();
     for y in 0..FIELD_HEIGHT {
