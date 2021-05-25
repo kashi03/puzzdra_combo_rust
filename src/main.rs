@@ -3,6 +3,7 @@ use util::puzzle as pz;
 use util::puzzle::{ FIELD_WIDTH, FIELD_HEIGHT };
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
+use rand::{ thread_rng, Rng };
 
 #[derive(Debug, Default, Clone)]
 struct Point {
@@ -84,8 +85,8 @@ fn beam_search(first_state: State, move_number: usize) -> State {
     }
     // now_states.push(first_state);
     
-    for count in 0..move_number {
-        println!("{}", count);
+    for _count in 0..move_number {
+        println!("{}", _count);
         let mut next_states:BinaryHeap<State> = BinaryHeap::new();
         for _ in 0..k {
             if now_states.is_empty() { break; }
@@ -113,25 +114,24 @@ fn beam_search(first_state: State, move_number: usize) -> State {
 }
 
 fn main() {
-    let f: [[i32; FIELD_WIDTH]; FIELD_HEIGHT] = [
-        [1,2,3,3,4,5],
-        [4,0,4,5,0,4],
-        [1,4,0,1,1,5],
-        [4,4,0,2,2,1],
-        [4,3,1,4,2,0],
-    ];
+    let mut f: [[i32; FIELD_WIDTH]; FIELD_HEIGHT] = Default::default();
+    let mut rng = thread_rng();
+    for y in 0..FIELD_HEIGHT {
+        for x in 0..FIELD_WIDTH {
+            f[y][x] = rng.gen_range(0..=5);
+        }
+    }
+
     let mut field: [[pz::Drop; FIELD_WIDTH]; FIELD_HEIGHT] = Default::default();
-    for (i, row) in f.iter().enumerate() {
-        for (j, col) in row.iter().enumerate() {
-            field[i][j] = pz::Drop {
-                drop_type: *col,
-                // is_delete: Cell::new(false),
+    for y in 0..FIELD_HEIGHT {
+        for x in 0..FIELD_WIDTH {
+            field[y][x] = pz::Drop {
+                drop_type: f[y][x],
                 is_search: false,
                 combo_hash: "".to_string(),
             }
         }
     }
-
     let first_point: Point = Point {
         x: 0,
         y: 0
@@ -142,7 +142,7 @@ fn main() {
         point: first_point.clone(),
         move_history: vec![first_point.clone()]
     };
-    let combo = beam_search(first_state, 70);
+    let combo = beam_search(first_state, 30);
     // let a = pz::Puzzle {
     //     field: field,
     //     field_width: 6,
@@ -150,6 +150,9 @@ fn main() {
     // };
     // let combo = a.get_combo();
     // a.show();
+    for i in f.iter() {
+        println!("{:?}", i);
+    }
     println!("{:?}", combo.move_history);
     println!("{}", combo.combo);
 }
