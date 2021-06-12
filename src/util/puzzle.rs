@@ -111,15 +111,10 @@ impl Puzzle {
     pub fn get_combo(&mut self) -> i32 {
         let mut combo: i32 = 0;
         loop {
-            for y in 0..FIELD_HEIGHT {
-                for x in 0..FIELD_WIDTH {
-                    self.check_drop(x, y, self.field[y][x].drop_type, format!("{}{}", x, y));
-                }
-            }
-    
             let mut combo_hash: HashSet<String> = HashSet::new();
             for y in 0..FIELD_HEIGHT {
                 for x in 0..FIELD_WIDTH {
+                    self.check_drop(x, y, self.field[y][x].drop_type, format!("{}{}", x, y));
                     if self.field[y][x].combo_hash != "" {
                         combo_hash.insert(self.field[y][x].combo_hash.clone());
                     }
