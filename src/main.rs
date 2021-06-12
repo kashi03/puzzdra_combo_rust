@@ -97,10 +97,12 @@ fn beam_search(first_state: State, move_number: usize) -> State {
                 combo: 0,
                 point: Point { x: x, y: y },
                 move_history: vec![Point { x: x, y: y }]
-            })
+            });
         }
     }
 
+    let mut max_combo = 0;
+    let mut best_state: State = Default::default();
     let mut done: HashSet<u64> = HashSet::new();
     // now_states.push(first_state);
     
@@ -110,6 +112,10 @@ fn beam_search(first_state: State, move_number: usize) -> State {
         for _ in 0..k {
             if now_states.is_empty() { break; }
             let state: State = now_states.pop().unwrap();
+            if max_combo < state.combo {
+                max_combo = state.combo;
+                best_state = state.clone();
+            }
             if state.point.x-1 >= 0 {
                 let next_state = get_next_state(&mut state.clone(), Point { x: state.point.x-1, y: state.point.y });
                 let hash = get_hash(&next_state);
@@ -145,7 +151,8 @@ fn beam_search(first_state: State, move_number: usize) -> State {
         }
         now_states = next_states;
     }
-    now_states.pop().unwrap()
+    // now_states.pop().unwrap()
+    best_state
 }
 
 fn main() {
@@ -185,16 +192,10 @@ fn main() {
         move_history: vec![first_point.clone()]
     };
     let combo = beam_search(first_state, 30);
-    // let a = pz::Puzzle {
-    //     field: field,
-    //     field_width: 6,
-    //     field_height: 5,
-    // };
-    // let combo = a.get_combo();
-    // a.show();
     for i in f.iter() {
         println!("{:?}", i);
     }
     println!("{:?}", combo.move_history);
+    println!("{}", combo.move_history.len());
     println!("{}", combo.combo);
 }
