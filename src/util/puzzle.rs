@@ -118,10 +118,10 @@ impl Puzzle {
             }
     
             let mut combo_hash: HashSet<String> = HashSet::new();
-            for row in self.field.iter() {
-                for col in row.iter() {
-                    if col.combo_hash != "" {
-                        combo_hash.insert(col.combo_hash.clone());
+            for y in 0..FIELD_HEIGHT {
+                for x in 0..FIELD_WIDTH {
+                    if self.field[y][x].combo_hash != "" {
+                        combo_hash.insert(self.field[y][x].combo_hash.clone());
                     }
                 }
             }
